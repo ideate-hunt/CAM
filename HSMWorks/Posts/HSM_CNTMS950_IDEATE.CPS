@@ -6,8 +6,22 @@
 
   $Revision: 38441 $
   $Date: 2015-02-01 16:06:26 +0100 (sø, 01 feb 2015) $
-  
+
   FORKID {9C9F6D64-F5A8-44b7-AB2F-4E3FC020C0EA}
+*/
+
+/* Notes:
+
+  * Fall 2015: pzali extensively customized the generic WinCNC post-processor
+    for use with a CNT Motions System 950 router running WinCNC.
+
+  * Feb 2016: garthz further modified this to better match the VisualCAM output
+    and fix some units issues involving tool changes (which must take place in
+    inches).
+
+  * The CNT Router prints all comments on screen in UPPER CASE, but they can be
+    lower-case for ease of reading in NC files.
+
 */
 
 description = "IDeATe WinCNC";
@@ -115,7 +129,7 @@ function writeBlock() {
 }
 
 function formatComment(text) {
-  return "[" + String(text).replace(/[\[\]]/g, "") + "]";
+  return "(" + String(text).replace(/[\[\]]/g, "") + ")";
 }
 
 /**
@@ -148,21 +162,25 @@ function onOpen() {
   if (!machineConfiguration.isMachineCoordinate(2)) {
     cOutput.disable();
   }
-  
+
   if (!properties.separateWordsWithSpace) {
     setWordSeparator("");
   }
 
   sequenceNumber = properties.sequenceNumberStart;
-  writeComment("IDeATe@Hunt - CNC Lab"); //TOP OF FILE
-  writeComment("HSM Works"); // Post Type
-  writeComment("--------------------"); //Separator
+
+
+  writeComment("IDeATe@Hunt - CNC Lab"); // TOP OF FILE
+  writeComment("HSMWorks post-processor for CNT Motion System 950)");
   if (programName) {
-    writeComment(programName);
+    writeComment("File name: " + programName);
   }
   if (programComment) {
     writeComment(programComment);
   }
+
+  writeComment("File units: " + ((unit==IN) ? "inches" : (unit==MM ? "mm" : "unsupported")));
+
   writeComment("--------------------"); //Separator
   // dump machine configuration
   var vendor = machineConfiguration.getVendor();
@@ -181,14 +199,15 @@ function onOpen() {
       writeComment("  " + localize("description") + ": "  + description);
     }
   }
-  writeComment("You are about to begin Milling!"); //TEXT
-  writeComment("1. STOCK IS SECURED TO THE TABLE?"); //TEXT
-  writeComment("2. SIMULATED FILE?"); //TEXT
-  writeComment("3. DUST COLLECTOR IS ON?"); //TEXT
-  writeComment("PRESS ENTER TO CONTINUE"); //TEXT
-  writeBlock(gFormat.format(4));
+  writeComment("You are about to begin milling. Please check the following:");
+  writeComment("1. Is your stock secured to the table?");
+  writeComment("2. Have you simulated your file?");
+  writeComment("3. Is the dust collector on?");
+  writeComment("PRESS ENTER TO CONTINUE");
+  writeBlock(gFormat.format(4)); // pause
+
   writeComment("--------------------"); //Separator
-  writeComment("Your Operations will require the following tools:"); //TEXT
+  writeComment("Your operations will require the following tools:"); //TEXT
   // dump tool information
   if (properties.writeTools) {
     var zRanges = {};
@@ -223,21 +242,25 @@ function onOpen() {
       }
     }
   }
-  writeComment("Make sure the tools listed above are:"); //TEXT
+
+  writeComment("Please make sure the tools listed above are"); //TEXT
   writeComment("1. The tools you selected in HSM Works"); //TEXT
   writeComment("2. Loaded in the correct locations"); //TEXT
   writeComment("PRESS ENTER TO CONTINUE"); //TEXT
   writeBlock(gFormat.format(4)); //Pause
+
   writeComment("--------------------"); //Separator
   writeComment("PROGRAM BEGIN"); //TEXT
+
   // absolute coordinates and feed per min
-  writeBlock(mFormat.format(61)+ " [VAC TABLE ON]");
+  writeBlock(mFormat.format(61)+ " (VACUUM TABLE ON)");
   writeBlock(gAbsIncModal.format(90) /*, gFeedModeModal.format(94)*/);
   // writeBlock(gFormat.format(28)); // calibrate
   // writeBlock(gPlaneModal.format(17));
 
   writeUnitsBlock();
 }
+
 
 function onComment(message) {
   writeComment(message);
@@ -248,7 +271,6 @@ function forceXYZ() {
   zOutput.reset();
   xOutput.reset();
   yOutput.reset();
-
 }
 
 /** Force output of A, B, and C. */
@@ -296,7 +318,7 @@ function setWorkPlane(abc) {
     conditional(machineConfiguration.isMachineCoordinate(1), "B" + abcFormat.format(abc.y)),
     conditional(machineConfiguration.isMachineCoordinate(2), "C" + abcFormat.format(abc.z))
   );
-  
+
   onCommand(COMMAND_LOCK_MULTI_AXIS);
 
   currentWorkPlaneABC = abc;
@@ -318,7 +340,7 @@ function getWorkPlaneMachineABC(workPlane) {
   } else {
     abc = machineConfiguration.getPreferredABC(abc);
   }
-  
+
   try {
     abc = machineConfiguration.remapABC(abc);
     currentMachineABC = abc;
@@ -330,13 +352,13 @@ function getWorkPlaneMachineABC(workPlane) {
       + conditional(machineConfiguration.isMachineCoordinate(2), " C" + abcFormat.format(abc.z))
     );
   }
-  
+
   var direction = machineConfiguration.getDirection(abc);
   if (!isSameDirection(direction, W.forward)) {
     error(localize("Orientation not supported."));
     return new Vector();
   }
-  
+
   if (!machineConfiguration.isABCSupported(abc)) {
     error(
       localize("Work plane is not supported") + ":"
@@ -354,7 +376,7 @@ function getWorkPlaneMachineABC(workPlane) {
     var R = machineConfiguration.getRemainingOrientation(abc, W);
     setRotation(R);
   }
-  
+
   return abc;
 }
 
@@ -387,12 +409,12 @@ function onSection() {
 
   if (insertToolCall) {
     forceWorkPlane();
-    
+
     retracted = true;
     if (!isFirstSection()) {
       onCommand(COMMAND_COOLANT_OFF);
     }
-  
+
     if (!isFirstSection() && properties.optionalStop) {
       onCommand(COMMAND_OPTIONAL_STOP);
     }
@@ -429,7 +451,7 @@ function onSection() {
     }
   }
 
-  if (properties.useToolChanger) {  
+  if (properties.useToolChanger) {
     if (insertToolCall ||
         isFirstSection() ||
         (rpmFormat.areDifferent(tool.spindleRPM, sOutput.getCurrent())) ||
@@ -441,8 +463,8 @@ function onSection() {
       if (tool.spindleRPM > 24000) {
         warning(localize("Spindle speed exceeds maximum value."));
       }
-      writeBlock(mFormat.format(tool.clockwise ? 3 : 4)); 
-      writeBlock(sOutput.format(tool.spindleRPM));
+      writeBlock(mFormat.format(tool.clockwise ? 3 : 4) + " (SPINDLE ON)");
+      writeBlock(sOutput.format(tool.spindleRPM) + " (SPINDLE RPM)");
     }
   }
 
@@ -587,7 +609,7 @@ function getCommonCycle(x, y, z, r) {
 function onCyclePoint(x, y, z) {
   if (isFirstCyclePoint()) {
     repositionToCycleClearance(cycle, x, y, z);
-    
+
     // return to initial Z which is clearance plane and set absolute mode
 
     var F = cycle.feedrate;
@@ -837,7 +859,7 @@ function onCommand(command) {
     return;
   case COMMAND_SPINDLE_CLOCKWISE:
     if (properties.useToolChanger) {
-      writeBlock(mFormat.format(3) + " [SPINDLE ON - CW]");
+      writeBlock(mFormat.format(3) + " (SPINDLE ON - CW)");
     }
     return;
   case COMMAND_SPINDLE_COUNTERCLOCKWISE:
@@ -847,7 +869,7 @@ function onCommand(command) {
     return;
   case COMMAND_STOP_SPINDLE:
     if (properties.useToolChanger) {
-      writeBlock(mFormat.format(5) + " [SPINDLE OFF]");
+      writeBlock(mFormat.format(5) + " (SPINDLE OFF)");
     }
     return;
   case COMMAND_ORIENTATE_SPINDLE:
@@ -864,14 +886,14 @@ function onCommand(command) {
   case COMMAND_TOOL_MEASURE:
     if (properties.useToolChanger) {
       writeComment("MEASURE TOOL BEGIN")
-      writeBlock(mFormat.format(18.1) + " c12" + " [LOAD TOOL CHECK]");/* Check if Tool Loaded */
-      writeBlock(mFormat.format(99.1) + "[ABORT IF NO TOOL]"); /* Cancel if No Tool */
-      writeBlock(mFormat.format(5) + " [SPINDLE OFF]"); /* SPINDLE OFF */
+      writeBlock(mFormat.format(18.1) + " c12" + " (CHECKS IF TOOL IS LOADED)");
+      writeBlock(mFormat.format(99.1) + " (JOB ENDS IF THERE IS NO TOOL!)");
+      writeBlock(mFormat.format(5) + " (SPINDLE OFF)");
       writeBlock(gFormat.format(49)+ "Z"); /**/
       writeBlock(gFormat.format(53) + " Z0"); /**/
       writeBlock(gFormat.format(53) + " X{tmx}" + " Y{tmy}"); /**/
       writeBlock(lFormat.format(91) + " G0" + " Z{tmd}"); /**/
-      writeBlock(lFormat.format(91) + " G1" + " Z-16" +" M28" + " F20" + " G31" + " [MEASURING]"); /* L91 G1 Z-16 M28 F20 G31 */
+      writeBlock(lFormat.format(91) + " G1" + " Z-16" +" M28" + " F20" + " G31" + " (MEASURING)"); /* L91 G1 Z-16 M28 F20 G31 */
       writeBlock(mFormat.format(37) + " Z{tm1}" + " T{tp1}"); /* M37 Z{tm1} T{tp1} */
       writeBlock(gFormat.format(53) + " Z0"); /* G53 Z0 */
       writeBlock(lFormat.format(91) + " G1" + " Z0" + " F50"); /* L91 G1 Z0 F50 */
@@ -896,29 +918,34 @@ function onSectionEnd() {
 }
 
 function onClose() {
+
+  writeComment("******** beginning closing sequence ********")
+
   // onCommand(COMMAND_COOLANT_OFF);
   onCommand(COMMAND_STOP_SPINDLE); /*Spindle OFF */
-  
-  writeBlock(gFormat.format(53) + "Z" +"[RETRACT HIGH-Z]"); /* retract High-Z */
-  writeBlock("T" + "0" + "[TOOL DROP]"); /* Tool Drop */
-  writeBlock(mFormat.format(62.1) + "[VAC TABLE OFF]"); /* Vac Table Off */
-  writeBlock(gFormat.format(92) + "[RESET MACHINE ZERO]"); /* RESET Machine Zero */
-  writeBlock(gFormat.format(53) + "Z" + "[RETRACT HIGH-Z]"); /* retract High-Z */
-  writeBlock(gFormat.format(28) + "Z" + "[RETRACT, RESET Z]"); /* retract, RESET Z */
-  zOutput.reset();
-  
-  writeBlock(gFormat.format(53) + "Y99" + "X46.5" + "[PARK X+Y]"); /* PARK Position X+Y */
-  setWorkPlane(new Vector(0, 0, 0) + "[RESET WORK PLANE]"); /* reset working plane */
-  writeBlock(lFormat.format(21) + "[SOFT LIMITS OFF]"); /* Soft Limits OFF */
-  writeBlock(gFormat.format(53) + "Z-16.180" + "[PARK Z]"); /* PARK Z */
-  writeBlock(lFormat.format(20) + "[SOFT LIMITS ON]"); /* Soft Limits ON */
-  // writeBlock(gFormat.format(28)); /* home XYZ */
-  writeComment("--------------------"); //Separator
-  writeComment("THIS JOB IS COMPLETE, IF YOU ARE DONE:"); //Separator
-  writeComment("SWEEP AND VACUUM ANY LEFTOVER DUST AND DEBRIS"); //Separator
-  writeComment("REMOVE AND PLACE SCRAPS IN TRASHCANS"); //Separator
-  writeComment("TURN OFF THE DUST COLLECTOR"); //Separator
-  writeComment("--------------------"); //Separator
 
+  writeBlock(gFormat.format(20) + " (set units to inch for parking sequence)");
+  writeBlock(gFormat.format(53) + "Z" + " (RETRACT HIGH-Z)"); /* retract High-Z */
+  writeBlock("T" + "0" + "(TOOL DROP)"); /* Tool Drop */
+  writeBlock(mFormat.format(62.1) + " (vacuum table off)"); /* Vac Table Off */
+  writeBlock(gFormat.format(92) + " (reset coordinate offsets)"); /* RESET Machine Zero */
+  writeBlock(gFormat.format(53) + "Z" + " (RETRACT HIGH-Z)"); /* retract High-Z */
+  writeBlock(gFormat.format(28) + "Z" + " (RETRACT, RESET Z)"); /* retract, RESET Z */
+  zOutput.reset();
+
+  writeBlock(gFormat.format(53) + "Y99" + "X46.5" + " (park position X+Y)");
+  setWorkPlane(new Vector(0, 0, 0) + "(RESET WORK PLANE)"); /* reset working plane */
+  writeBlock(lFormat.format(21) + " (SOFT LIMITS OFF)"); /* Soft Limits OFF */
+  writeBlock(gFormat.format(53) + " Z-16.180" + " (PARK Z)"); /* PARK Z */
+  writeBlock(lFormat.format(20) + " (SOFT LIMITS ON)"); /* Soft Limits ON */
+  // writeBlock(gFormat.format(28)); /* home XYZ */
+
+  // Leave a final request visible to the operator.
+  writeComment("********************************************************");
+  writeComment("If you are done, please");
+  writeComment(" 1. sweep and vacuum any leftover dust and debris");
+  writeComment(" 2. remove and place scraps in trashcans");
+  writeComment(" 3. turn off the dust collector");
+  writeComment("********************************************************");
 
 }
