@@ -523,12 +523,16 @@ function onSection() {
         return;
       }
     }
-    
+
     gMotionModal.reset();
     // writeBlock(gPlaneModal.format(17));
-    
-    if (!machineConfiguration.isHeadConfiguration()) {
-      writeBlock(gMotionModal.format(0), conditional(properties.useToolChanger, gFormat.format(43)), zOutput.format(initialPosition.z));
+
+      if (!machineConfiguration.isHeadConfiguration()) {
+	// garthz: WinCNC cannot handle G43 on the same line as G0.
+	// garthz: It is also not needed, since the tool change sequence leaves the offset set correctly.
+	// writeBlock(conditional(properties.useToolChanger, gFormat.format(43)));
+
+	writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
       writeBlock(
         gAbsIncModal.format(90),
         gMotionModal.format(0), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y)
@@ -538,8 +542,8 @@ function onSection() {
       writeBlock(
         gAbsIncModal.format(90),
         gMotionModal.format(0),
-        conditional(properties.useToolChanger, gFormat.format(43)),
-        zOutput.format(initialPosition.z), 
+        // conditional(properties.useToolChanger, gFormat.format(43)),
+        zOutput.format(initialPosition.z),
         xOutput.format(initialPosition.x),
         yOutput.format(initialPosition.y)
 
