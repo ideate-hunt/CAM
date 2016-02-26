@@ -121,6 +121,19 @@ function writeComment(text) {
   writeln(formatComment(text));
 }
 
+// Write a G20 or G22 command.  Several fixed sequences force a switch to inches, so
+// for example, this is called after tool changes.
+function writeUnitsBlock() {
+  switch (unit) {
+  case IN:
+    writeBlock(gUnitModal.format(20) + " (set inch units)");
+    break;
+  case MM:
+    writeBlock(gUnitModal.format(22) + " (set mm units)"); // G21 is cm, G22 is mm on WinCNC
+    break;
+  }
+}
+
 function onOpen() {
   if (!machineConfiguration.isMachineCoordinate(0)) {
     aOutput.disable();
