@@ -27,3 +27,34 @@ millimeters or inches.
 
 **.hsmlib** files contain HSMWorks tool tables.  The same tables work with either
 millimeters or inches.
+
+
+CNT Router Tooling
+------------------
+
+The router tool changer has nine tool slots, of the first eight of which are
+generally a standard set of tools.  Tool 1 is near the edge of the machine,
+i.e. on the left when viewed from the operator console.
+
+The standard set includes:
+
+1. 6mm drill
+2. 1/4" tapered mill, R0.125", 5 degree taper
+3. 1/4" flat mill
+4. 3/8" ball mill
+5. 3/8" flat mill
+6. 1/2" ball mill
+7. 1/2" flat mill
+8. 1/2" flat mill for foam only
+
+This listing is intended for design guidance only and does not supersede the CAM
+tool tables.
+
+References
+----------
+
+#. [IDeATe CAM tutorials](http://hunt.ideate.cmu.edu/category/cam-tutorials/)
+#. [CNC Router procedures guide](http://hunt.ideate.cmu.edu/cncrouter-procedure/)
+#  [CNC Router policy guide](http://hunt.ideate.cmu.edu/cncrouter-policy/)
+#. [CNC Router tutorials](http://hunt.ideate.cmu.edu/tag/tutorials+cnc-router/)
+#. [CNC Router startup instructions for administrators](http://hunt.ideate.cmu.edu/cncrouter-start)
