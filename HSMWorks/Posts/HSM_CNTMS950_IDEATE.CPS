@@ -10,7 +10,7 @@
   FORKID {9C9F6D64-F5A8-44b7-AB2F-4E3FC020C0EA}
 */
 
-description = "Generic WinCNC";
+description = "IDeATe WinCNC";
 vendor = "Autodesk, Inc.";
 vendorUrl = "http://www.autodesk.com";
 legal = "Copyright (C) 2012-2014 by Autodesk, Inc.";
@@ -25,7 +25,7 @@ tolerance = spatial(0.002, MM);
 minimumChordLength = spatial(0.01, MM);
 minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
-minimumCircularSweep = toRad(0.01);
+minimumCircularSweep = toRad(0.01);21
 maximumCircularSweep = toRad(180);
 allowHelicalMoves = true;
 allowedCircularPlanes = undefined; // allow any circular motion
@@ -42,10 +42,10 @@ properties = {
   optionalStop: true, // optional stop
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
   useToolChanger: true, // specifies that a tool changer is available
-  ATCMode: 0 // M0 or M1 on the ATC line in the WinCNC.ini file
+  ATCMode: 1 // M0 or M1 on the ATC line in the WinCNC.ini file
 };
 
-var numberOfToolSlots = 9999;
+var numberOfToolSlots = 8;
 
 
 
@@ -58,8 +58,9 @@ var mapCoolantTable = new Table(
 */
 
 var gFormat = createFormat({prefix:"G", decimals:0});
-var mFormat = createFormat({prefix:"M", decimals:0});
+var mFormat = createFormat({prefix:"M", decimals:1});
 var hFormat = createFormat({prefix:"H", decimals:0});
+var lFormat = createFormat({prefix:"L", decimals:0});
 
 var xyzFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var abcFormat = createFormat({decimals:3, forceDecimal:true, scale:DEG});
@@ -136,14 +137,16 @@ function onOpen() {
   }
 
   sequenceNumber = properties.sequenceNumberStart;
-
+  writeComment("IDeATe@Hunt - CNC Lab"); //TOP OF FILE
+  writeComment("HSM Works"); // Post Type
+  writeComment("--------------------"); //Separator
   if (programName) {
     writeComment(programName);
   }
   if (programComment) {
     writeComment(programComment);
   }
-
+  writeComment("--------------------"); //Separator
   // dump machine configuration
   var vendor = machineConfiguration.getVendor();
   var model = machineConfiguration.getModel();
@@ -161,7 +164,14 @@ function onOpen() {
       writeComment("  " + localize("description") + ": "  + description);
     }
   }
-
+  writeComment("You are about to begin Milling!"); //TEXT
+  writeComment("1. STOCK IS SECURED TO THE TABLE?"); //TEXT
+  writeComment("2. SIMULATED FILE?"); //TEXT
+  writeComment("3. DUST COLLECTOR IS ON?"); //TEXT
+  writeComment("PRESS ENTER TO CONTINUE"); //TEXT
+  writeBlock(gFormat.format(4));
+  writeComment("--------------------"); //Separator
+  writeComment("Your Operations will require the following tools:"); //TEXT
   // dump tool information
   if (properties.writeTools) {
     var zRanges = {};
@@ -183,22 +193,28 @@ function onOpen() {
     if (tools.getNumberOfTools() > 0) {
       for (var i = 0; i < tools.getNumberOfTools(); ++i) {
         var tool = tools.getTool(i);
-        var comment = "T" + toolFormat.format(tool.number) + "  " +
-          "D=" + xyzFormat.format(tool.diameter) + " " +
-          localize("CR") + "=" + xyzFormat.format(tool.cornerRadius);
+        var comment = "Tool #:" + toolFormat.format(tool.number) + "  " +
+          "Diameter=" + xyzFormat.format(tool.diameter);
         if ((tool.taperAngle > 0) && (tool.taperAngle < Math.PI)) {
           comment += " " + localize("TAPER") + "=" + taperFormat.format(tool.taperAngle) + localize("deg");
         }
         if (zRanges[tool.number]) {
           comment += " - " + localize("ZMIN") + "=" + xyzFormat.format(zRanges[tool.number].getMinimum());
         }
-        comment += " - " + getToolTypeName(tool.type);
+        comment += " - Type: " + getToolTypeName(tool.type);
         writeComment(comment);
       }
     }
   }
-
+  writeComment("Make sure the tools listed above are:"); //TEXT
+  writeComment("1. The tools you selected in HSM Works"); //TEXT
+  writeComment("2. Loaded in the correct locations"); //TEXT
+  writeComment("PRESS ENTER TO CONTINUE"); //TEXT
+  writeBlock(gFormat.format(4)); //Pause
+  writeComment("--------------------"); //Separator
+  writeComment("PROGRAM BEGIN"); //TEXT
   // absolute coordinates and feed per min
+  writeBlock(mFormat.format(61)+ " [VAC TABLE ON]");
   writeBlock(gAbsIncModal.format(90) /*, gFeedModeModal.format(94)*/);
   // writeBlock(gFormat.format(28)); // calibrate
   // writeBlock(gPlaneModal.format(17));
@@ -219,9 +235,10 @@ function onComment(message) {
 
 /** Force output of X, Y, and Z. */
 function forceXYZ() {
+  zOutput.reset();
   xOutput.reset();
   yOutput.reset();
-  zOutput.reset();
+
 }
 
 /** Force output of A, B, and C. */
@@ -345,7 +362,7 @@ function onSection() {
       
     // retract to safe plane
     retracted = true;
-    writeBlock(gFormat.format(53)); // retract
+    writeBlock(gFormat.format(53) + "[RETRACT Z]"); // retract
     // writeBlock(gFormat.format(28) + "Z"); // retract
     zOutput.reset();
   }
@@ -374,7 +391,8 @@ function onSection() {
     }
 
     if (properties.useToolChanger) {
-      writeBlock("T" + toolFormat.format(tool.number));
+      writeBlock("T" + toolFormat.format(tool.number) + " [TOOL PICK]");
+      onCommand(COMMAND_TOOL_MEASURE);
     }
     if (tool.comment) {
       writeComment(tool.comment);
@@ -402,16 +420,15 @@ function onSection() {
         isFirstSection() ||
         (rpmFormat.areDifferent(tool.spindleRPM, sOutput.getCurrent())) ||
         (tool.clockwise != getPreviousSection().getTool().clockwise)) {
-      if (tool.spindleRPM < 1) {
+      if (tool.spindleRPM < 4500) {
         error(localize("Spindle speed out of range."));
         return;
       }
-      if (tool.spindleRPM > 99999) {
+      if (tool.spindleRPM > 24000) {
         warning(localize("Spindle speed exceeds maximum value."));
       }
-      writeBlock(
-        sOutput.format(tool.spindleRPM), mFormat.format(tool.clockwise ? 3 : 4)
-      );
+      writeBlock(mFormat.format(tool.clockwise ? 3 : 4)); 
+      writeBlock(sOutput.format(tool.spindleRPM));
     }
   }
 
@@ -485,7 +502,8 @@ function onSection() {
         writeBlock(mFormat.format(37), hFormat.format(tool.lengthOffset));
         break;
       case 1:
-        writeBlock(mFormat.format(37), "T" + toolFormat.format(tool.number));
+        // writeBlock(mFormat.format(37), "T" + toolFormat.format(tool.number)); // This is already called on line 378!
+        writeComment("AUTOMATIC TOOL CHANGER MODE ACTIVE");
         break;
       default:
         error(localize("Invalid ATC mode. Must be 0 or 1."));
@@ -497,25 +515,28 @@ function onSection() {
     // writeBlock(gPlaneModal.format(17));
     
     if (!machineConfiguration.isHeadConfiguration()) {
+      writeBlock(gMotionModal.format(0), conditional(properties.useToolChanger, gFormat.format(43)), zOutput.format(initialPosition.z));
       writeBlock(
         gAbsIncModal.format(90),
         gMotionModal.format(0), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y)
       );
-      writeBlock(gMotionModal.format(0), conditional(properties.useToolChanger, gFormat.format(43)), zOutput.format(initialPosition.z));
+
     } else {
       writeBlock(
         gAbsIncModal.format(90),
         gMotionModal.format(0),
         conditional(properties.useToolChanger, gFormat.format(43)),
+        zOutput.format(initialPosition.z), 
         xOutput.format(initialPosition.x),
-        yOutput.format(initialPosition.y),
-        zOutput.format(initialPosition.z)
+        yOutput.format(initialPosition.y)
+
       );
     }
   } else {
     writeBlock(
       gAbsIncModal.format(90),
       gMotionModal.format(0),
+      zOutput.format(initialPosition.z),
       xOutput.format(initialPosition.x),
       yOutput.format(initialPosition.y)
     );
@@ -634,15 +655,15 @@ function onRadiusCompensation() {
 }
 
 function onRapid(_x, _y, _z) {
+  var z = zOutput.format(_z);
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
-  var z = zOutput.format(_z);
   if (x || y || z) {
     if (pendingRadiusCompensation >= 0) {
       error(localize("Radius compensation mode cannot be changed at rapid traversal."));
       return;
     }
-    writeBlock(gMotionModal.format(0), x, y, z);
+    writeBlock(gMotionModal.format(0), z, x, y);
     feedOutput.reset();
   }
 }
@@ -654,9 +675,9 @@ function onLinear(_x, _y, _z, feed) {
     xOutput.reset();
     yOutput.reset();
   }
+  var z = zOutput.format(_z);
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
-  var z = zOutput.format(_z);
   var f = feedOutput.format(feed);
   if (x || y || z) {
     if (pendingRadiusCompensation >= 0) {
@@ -798,7 +819,7 @@ function onCommand(command) {
     return;
   case COMMAND_SPINDLE_CLOCKWISE:
     if (properties.useToolChanger) {
-      writeBlock(mFormat.format(3));
+      writeBlock(mFormat.format(3) + " [SPINDLE ON - CW]");
     }
     return;
   case COMMAND_SPINDLE_COUNTERCLOCKWISE:
@@ -808,7 +829,7 @@ function onCommand(command) {
     return;
   case COMMAND_STOP_SPINDLE:
     if (properties.useToolChanger) {
-      writeBlock(mFormat.format(5));
+      writeBlock(mFormat.format(5) + " [SPINDLE OFF]");
     }
     return;
   case COMMAND_ORIENTATE_SPINDLE:
@@ -823,6 +844,22 @@ function onCommand(command) {
   case COMMAND_BREAK_CONTROL:
     return;
   case COMMAND_TOOL_MEASURE:
+    if (properties.useToolChanger) {
+      writeComment("MEASURE TOOL BEGIN")
+      writeBlock(mFormat.format(18.1) + " c12" + " [LOAD TOOL CHECK]");/* Check if Tool Loaded */
+      writeBlock(mFormat.format(99.1) + "[ABORT IF NO TOOL]"); /* Cancel if No Tool */
+      writeBlock(mFormat.format(5) + " [SPINDLE OFF]"); /* SPINDLE OFF */
+      writeBlock(gFormat.format(49)+ "Z"); /**/
+      writeBlock(gFormat.format(53) + " Z0"); /**/
+      writeBlock(gFormat.format(53) + " X{tmx}" + " Y{tmy}"); /**/
+      writeBlock(lFormat.format(91) + " G0" + " Z{tmd}"); /**/
+      writeBlock(lFormat.format(91) + " G1" + " Z-16" +" M28" + " F20" + " G31" + " [MEASURING]"); /* L91 G1 Z-16 M28 F20 G31 */
+      writeBlock(mFormat.format(37) + " Z{tm1}" + " T{tp1}"); /* M37 Z{tm1} T{tp1} */
+      writeBlock(gFormat.format(53) + " Z0"); /* G53 Z0 */
+      writeBlock(lFormat.format(91) + " G1" + " Z0" + " F50"); /* L91 G1 Z0 F50 */
+      writeBlock(gFormat.format(0)); /* g0 */
+      writeComment("MEASURE TOOL END")
+    }
     return;
   }
 
@@ -841,14 +878,29 @@ function onSectionEnd() {
 }
 
 function onClose() {
-  onCommand(COMMAND_COOLANT_OFF);
-  onCommand(COMMAND_STOP_SPINDLE);
+  // onCommand(COMMAND_COOLANT_OFF);
+  onCommand(COMMAND_STOP_SPINDLE); /*Spindle OFF */
   
-  writeBlock(gFormat.format(53)); // retract
-  // writeBlock(gFormat.format(28) + "Z"); // retract
+  writeBlock(gFormat.format(53) + "Z" +"[RETRACT HIGH-Z]"); /* retract High-Z */
+  writeBlock("T" + "0" + "[TOOL DROP]"); /* Tool Drop */
+  writeBlock(mFormat.format(62.1) + "[VAC TABLE OFF]"); /* Vac Table Off */
+  writeBlock(gFormat.format(92) + "[RESET MACHINE ZERO]"); /* RESET Machine Zero */
+  writeBlock(gFormat.format(53) + "Z" + "[RETRACT HIGH-Z]"); /* retract High-Z */
+  writeBlock(gFormat.format(28) + "Z" + "[RETRACT, RESET Z]"); /* retract, RESET Z */
   zOutput.reset();
+  
+  writeBlock(gFormat.format(53) + "Y99" + "X46.5" + "[PARK X+Y]"); /* PARK Position X+Y */
+  setWorkPlane(new Vector(0, 0, 0) + "[RESET WORK PLANE]"); /* reset working plane */
+  writeBlock(lFormat.format(21) + "[SOFT LIMITS OFF]"); /* Soft Limits OFF */
+  writeBlock(gFormat.format(53) + "Z-16.180" + "[PARK Z]"); /* PARK Z */
+  writeBlock(lFormat.format(20) + "[SOFT LIMITS ON]"); /* Soft Limits ON */
+  // writeBlock(gFormat.format(28)); /* home XYZ */
+  writeComment("--------------------"); //Separator
+  writeComment("THIS JOB IS COMPLETE, IF YOU ARE DONE:"); //Separator
+  writeComment("SWEEP AND VACUUM ANY LEFTOVER DUST AND DEBRIS"); //Separator
+  writeComment("REMOVE AND PLACE SCRAPS IN TRASHCANS"); //Separator
+  writeComment("TURN OFF THE DUST COLLECTOR"); //Separator
+  writeComment("--------------------"); //Separator
 
-  setWorkPlane(new Vector(0, 0, 0)); // reset working plane
 
-  writeBlock(gFormat.format(28)); // home XYZ
 }
