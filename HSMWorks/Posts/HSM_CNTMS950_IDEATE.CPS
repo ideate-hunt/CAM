@@ -33,13 +33,14 @@ allowedCircularPlanes = undefined; // allow any circular motion
 
 
 // user-defined properties
+// garthz:  It isn't clear whether M1 (optional stop) is supported by WinCNC, so turning it off.
 properties = {
   writeMachine: true, // write machine
   writeTools: true, // writes the tools
   showSequenceNumbers: false, // show sequence numbers
   sequenceNumberStart: 10, // first sequence number
   sequenceNumberIncrement: 1, // increment for sequence numbers
-  optionalStop: true, // optional stop
+  optionalStop: false, // optional stop
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
   useToolChanger: true, // specifies that a tool changer is available
   ATCMode: 1 // M0 or M1 on the ATC line in the WinCNC.ini file
