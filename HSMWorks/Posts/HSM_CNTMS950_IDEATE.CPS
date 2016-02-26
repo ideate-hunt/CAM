@@ -85,7 +85,10 @@ var iOutput = createReferenceVariable({prefix:"I", force:true}, xyzFormat);
 var jOutput = createReferenceVariable({prefix:"J", force:true}, xyzFormat);
 var kOutput = createReferenceVariable({prefix:"K", force:true}, xyzFormat);
 
-var gMotionModal = createModal({}, gFormat); // modal group 1 // G0-G3, ...
+// garthz: WinCNC does not treat G2 and G3 modally, the code must appear on
+// every line, so this has been changed to always force motion code output.
+var gMotionModal = createModal({force:true}, gFormat); // modal group 1 // G0-G3, ...
+
 // var gPlaneModal = createModal({onchange:function () {gMotionModal.reset();}}, gFormat); // modal group 2 // G17-19
 var gAbsIncModal = createModal({}, gFormat); // modal group 3 // G90-91
 var gFeedModeModal = createModal({}, gFormat); // modal group 5 // G93-94
@@ -232,14 +235,7 @@ function onOpen() {
   // writeBlock(gFormat.format(28)); // calibrate
   // writeBlock(gPlaneModal.format(17));
 
-  switch (unit) {
-  case IN:
-    writeBlock(gUnitModal.format(20));
-    break;
-  case MM:
-    writeBlock(gUnitModal.format(22)); // G21 is cm
-    break;
-  }
+  writeUnitsBlock();
 }
 
 function onComment(message) {
@@ -404,9 +400,12 @@ function onSection() {
     }
 
     if (properties.useToolChanger) {
-      writeBlock("T" + toolFormat.format(tool.number) + " [TOOL PICK]");
+      writeBlock(gUnitModal.format(20) + " (set inch units for tool change)");
+      writeBlock("T" + toolFormat.format(tool.number) + " (TOOL PICK)");
       onCommand(COMMAND_TOOL_MEASURE);
+      writeUnitsBlock(); // return to mm if necessary
     }
+
     if (tool.comment) {
       writeComment(tool.comment);
     }
