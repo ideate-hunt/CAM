@@ -362,21 +362,22 @@ function onSection() {
   var insertToolCall = isFirstSection() ||
     currentSection.getForceToolChange && currentSection.getForceToolChange() ||
     (tool.number != getPreviousSection().getTool().number);
-  
+
   var retracted = false; // specifies that the tool has been retracted to the safe plane
   var newWorkOffset = isFirstSection() ||
     (getPreviousSection().workOffset != currentSection.workOffset); // work offset changes
   var newWorkPlane = isFirstSection() ||
     !isSameDirection(getPreviousSection().getGlobalFinalToolAxis(), currentSection.getGlobalInitialToolAxis());
+
   if (insertToolCall || newWorkOffset || newWorkPlane) {
-      
+    // garthz: taking this out to match VisualCAM post.
     // retract to safe plane
-    retracted = true;
-    writeBlock(gFormat.format(53) + "[RETRACT Z]"); // retract
+    // retracted = true;
+    // writeBlock(gFormat.format(53) + " (RETRACT Z)"); // retract
     // writeBlock(gFormat.format(28) + "Z"); // retract
-    zOutput.reset();
+    // zOutput.reset();
   }
-  
+
   if (hasParameter("operation-comment")) {
     var comment = getParameter("operation-comment");
     if (comment) {
