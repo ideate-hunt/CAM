@@ -32,9 +32,9 @@ millimeters or inches.
 CNT Router Tooling
 ------------------
 
-The router tool changer has ten tool slots, of the first eight of which are
-generally a standard set of tools.  Tool 1 is near the edge of the machine,
-i.e. on the left when viewed from the operator console.
+The router tool changer has nine installed tool holder nests, of which the first
+eight of which are generally a standard set of tools.  Tool 1 is near the edge
+of the machine, i.e. on the left when viewed from the operator console.
 
 The standard set includes:
 
