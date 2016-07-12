@@ -231,7 +231,7 @@ STARTUP_ProgramCodeStart
 (********************************************************)
 G4
 M61 (VACUUM TABLE ON)
-[SEQ_PRECHAR][SEQNUM][OUTPUT_MODE_CODE]
+[SEQ_PRECHAR][SEQNUM] [OUTPUT_MODE_CODE]
 STARTUP_ProgramCodeEnd
 
 
@@ -240,7 +240,7 @@ STARTUP_ProgramCodeEnd
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 TOOLCHANGE_AdjustRegister = H
 TOOLCHANGE_FirstMacroStart
-[SEQ_PRECHAR][SEQNUM]G20 (SET UNITS TO IN)
+[SEQ_PRECHAR][SEQNUM] G20 (SET UNITS TO IN)
 [SEQ_PRECHAR][SEQNUM] T[TOOL_NUM] (TOOL PICK)
 [SEQ_PRECHAR][SEQNUM] m18.1 c12 (CHECKS IF TOOL IS LOADED)
 [SEQ_PRECHAR][SEQNUM] m99.1 (JOB ENDS IF THERE IS NO TOOL!)
@@ -256,12 +256,12 @@ TOOLCHANGE_FirstMacroStart
 [SEQ_PRECHAR][SEQNUM] L91 G1 Z0 F50
 [SEQ_PRECHAR][SEQNUM] g0
 [SEQ_PRECHAR][SEQNUM] (MEASURE TOOL END)
-[SEQ_PRECHAR][SEQNUM][OUTPUT_MODE_CODE]
+[SEQ_PRECHAR][SEQNUM] G22 (SET UNITS TO MM)
 [SEQ_PRECHAR][SEQNUM] M3 (SPINDLE ON)
-[SEQ_PRECHAR][SEQNUM][SPINDLE_BLK] (SPINDLE RPM)
+[SEQ_PRECHAR][SEQNUM] [SPINDLE_BLK] (SPINDLE RPM)
 TOOLCHANGE_FirstMacroEnd
 TOOLCHANGE_MacroStart
-[SEQ_PRECHAR][SEQNUM]G20 (SET UNITS TO IN)
+[SEQ_PRECHAR][SEQNUM] G20 (SET UNITS TO IN)
 [SEQ_PRECHAR][SEQNUM] T[TOOL_NUM] (TOOL PICK)
 [SEQ_PRECHAR][SEQNUM] m18.1 c12 (CHECKS IF TOOL IS LOADED)
 [SEQ_PRECHAR][SEQNUM] m99.1 (JOB ENDS IF THERE IS NO TOOL!)
@@ -277,9 +277,9 @@ TOOLCHANGE_MacroStart
 [SEQ_PRECHAR][SEQNUM] L91 G1 Z0 F50
 [SEQ_PRECHAR][SEQNUM] g0
 [SEQ_PRECHAR][SEQNUM] (MEASURE TOOL END)
-[SEQ_PRECHAR][SEQNUM][OUTPUT_MODE_CODE]
+[SEQ_PRECHAR][SEQNUM] G22 (SET UNITS TO MM)
 [SEQ_PRECHAR][SEQNUM] M3 (SPINDLE ON)
-[SEQ_PRECHAR][SEQNUM][SPINDLE_BLK] (SPINDLE RPM)
+[SEQ_PRECHAR][SEQNUM] [SPINDLE_BLK] (SPINDLE RPM)
 TOOLCHANGE_MacroEnd
 TOOLCHANGE_CutComLeftStart
 
@@ -466,10 +466,10 @@ CYCLES_CycleOffCodeEnd
 // END DEFINITION SECTION
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 END_ProgramCodeStart
-[SEQ_PRECHAR][SEQNUM]M5 (SPINDLE OFF)
-[SEQ_PRECHAR][SEQNUM]G20 (SET UNITS TO IN)
-[SEQ_PRECHAR][SEQNUM]G53 Z (HIGH Z-AXIS)
-[SEQ_PRECHAR][SEQNUM]T0 (TOOL DROP)
+[SEQ_PRECHAR][SEQNUM] M5 (SPINDLE OFF)
+[SEQ_PRECHAR][SEQNUM] G20 (SET UNITS TO IN)
+[SEQ_PRECHAR][SEQNUM] G53 Z (HIGH Z-AXIS)
+[SEQ_PRECHAR][SEQNUM] T0 (TOOL DROP)
 M62.1 (VACUUM TABLE OFF)
 G92
 G53 Z
