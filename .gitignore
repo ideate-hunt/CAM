@@ -1,2 +1,3 @@
-# ignore text editor backup files
+# ignore text editor backup files and OSX cruft
 *~
+.DS_Store

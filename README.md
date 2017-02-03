@@ -10,8 +10,9 @@ Eventually, these will be installed by default on IDeATe cluster computers along
 with the Rhino and SolidWorks installations, but for now this can be installed
 as needed by individual students.
 
-RhinoCAM and VisualCAM share a common CAM platform, and so the actual
-post-processor files may possibly be identical between the two products.
+RhinoCAM and VisualCAM share a common CAM platform from
+[MecSoft](https://mecsoft.com/), and so the post-processor and tool files are
+shared between the two.
 
 notes on file types
 -------------------
@@ -38,7 +39,7 @@ of the machine, i.e. on the left when viewed from the operator console.
 
 The standard set includes:
 
-1. 6mm drill
+1. engraving tool
 2. 1/4" tapered mill, R0.125", 5 degree taper
 3. 1/4" flat mill
 4. 3/8" ball mill
@@ -46,6 +47,7 @@ The standard set includes:
 6. 1/2" ball mill
 7. 1/2" flat mill
 8. 1/2" flat mill for foam only
+9. drill chuck
 
 This listing is intended for design guidance only and does not supersede the CAM
 tool tables.
