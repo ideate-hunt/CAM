@@ -55,8 +55,4 @@ tool tables.
 References
 ----------
 
-#. [IDeATe CAM tutorials](http://hunt.ideate.cmu.edu/category/cam-tutorials/)
-#. [CNC Router procedures guide](http://hunt.ideate.cmu.edu/cncrouter-procedure/)
-#  [CNC Router policy guide](http://hunt.ideate.cmu.edu/cncrouter-policy/)
-#. [CNC Router tutorials](http://hunt.ideate.cmu.edu/tag/tutorials+cnc-router/)
-#. [CNC Router startup instructions for administrators](http://hunt.ideate.cmu.edu/cncrouter-start)
+  * [IDeATe CNC Router Procedures and policies](https://resources.ideate.cmu.edu/equipment/cnc-router/)
