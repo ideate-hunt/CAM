@@ -55,4 +55,4 @@ tool tables.
 References
 ----------
 
-  * [IDeATe CNC Router Procedures and policies](https://resources.ideate.cmu.edu/equipment/cnc-router/)
+  * [IDeATe CNC Router Procedures and Policies](https://resources.ideate.cmu.edu/equipment/cnc-router/)
