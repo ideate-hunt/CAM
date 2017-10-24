@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<template-document version="1.0" xmlns="http://www.hsmworks.com/namespace/hsmworks/document/template">
+	<template strategy="drill" unit="millimeters" description="Drill 6.35 mm with mill">
+		<tool version="1.1" type="flat end mill" unit="inches" guid="{5d24cea9-4448-4c00-8422-ae1ee8467565}">
+			<description>All Materials</description>
+			<manufacturer>Onsrud</manufacturer>
+			<nc number="3" diameter-offset="0" length-offset="0" break-control="0" manual-tool-change="0"/>
+			<coolant mode="disabled"/>
+			<material name="carbide"/>
+			<body diameter="0.25" flute-length="1.125" shoulder-length="1.125" shaft-diameter="0.25" body-length="2.375" overall-length="3" number-of-flutes="1" thread-pitch="0"/>
+			<holder description="IDeATe CNC Tool Holder" comment="ISO-30, ER032, Quick Change" vendor="CNT Motion Systems" guid="{07e277e5-26dd-4b06-ab21-df8ede8d31a9}" library-name="2015_IDeATe_HSM">
+				<section diameter="1.9685" length="0"/>
+				<section diameter="1.9685" length="1.34252"/>
+				<section diameter="1.9685" length="0.1771654"/>
+				<section diameter="1.74409" length="0.0590551"/>
+				<section diameter="1.74409" length="0.1535433"/>
+				<section diameter="1.9685" length="0.0590551"/>
+				<section diameter="1.9685" length="0.1771654"/>
+			</holder>
+			<motion spindle-rpm="16000" ramp-spindle-rpm="16000" clockwise="yes" feed-mode="per-minute" cutting-feedrate="300" entry-feedrate="150" exit-feedrate="150" plunge-feedrate="80" ramp-feedrate="100" retract-feedrate="80"/>
+		</tool>
+		<parameter name="tool_coolant" expression="'disabled'"/>
+		<parameter name="tool_feedCutting" expression="300.in/min"/>
+		<parameter name="tool_feedEntry" expression="150.in/min"/>
+		<parameter name="tool_feedExit" expression="150.in/min"/>
+		<parameter name="tool_feedPerRevolution" expression="tool_feedPlunge/tool_spindleSpeed"/>
+		<parameter name="tool_feedPerTooth" expression="tool_feedCutting/(tool_spindleSpeed * tool_numberOfFlutes)"/>
+		<parameter name="tool_feedPlunge" expression="2032"/>
+		<parameter name="tool_feedRamp" expression="100.in/min"/>
+		<parameter name="tool_feedRetract" expression="80.in/min"/>
+		<parameter name="tool_rampFeedPerTooth" expression="tool_feedRamp/(tool_rampSpindleSpeed * tool_numberOfFlutes)"/>
+		<parameter name="tool_rampSpindleSpeed" expression="tool_spindleSpeed"/>
+		<parameter name="tool_rampSurfaceSpeed" expression="tool_isTurning ? (200m/min) : (tool_stockDiameter * Math.PI * tool_rampSpindleSpeed)"/>
+		<parameter name="tool_spindleSpeed" expression="16000."/>
+		<parameter name="tool_stockDiameter" expression="tool_isTurning ? (tool_unit == 'millimeters' ? 25 : 25.4) : tool_diameter"/>
+		<parameter name="tool_surfaceSpeed" expression="tool_isTurning ? (200m/min) : (tool_stockDiameter * Math.PI * tool_spindleSpeed)"/>
+		<parameter name="accumulatedPeckingDepth" expression="Math.max(tool_diameter * 2.5; peckingDepth)"/>
+		<parameter name="autoMergeHoleSegments" expression="false"/>
+		<parameter name="backBoreDistance" expression="0.0mm"/>
+		<parameter name="boringShift" expression="0.0mm"/>
+		<parameter name="bottom" expression="bottomOffset"/>
+		<parameter name="bottomMode" expression="'from hole bottom'"/>
+		<parameter name="bottomOffset" expression="-0.35mm"/>
+		<parameter name="bottomRef" expression="undefined"/>
+		<parameter name="breakThroughDepth" expression="0.0mm"/>
+		<parameter name="breakThroughDistance" expression="tool_diameter"/>
+		<parameter name="breakThroughFeedrate" expression="tool_feedRetract"/>
+		<parameter name="breakThroughSpindleSpeed" expression="tool_spindleSpeed"/>
+		<parameter name="checkAgainstModel" expression="false"/>
+		<parameter name="checkGeometryBlockingHoles" expression="true"/>
+		<parameter name="chipBreakDistance" expression="Math.max(tool_diameter * 0.02; 0.1)"/>
+		<parameter name="clearanceHeight" expression="retractHeight + clearanceHeightOffset"/>
+		<parameter name="clearanceHeightMode" expression="'from retract height'"/>
+		<parameter name="clearanceHeightOffset" expression="120mm"/>
+		<parameter name="clearanceHeightRef" expression="undefined"/>
+		<parameter name="compareTolerance" expression="tool_diameter * 1e-5"/>
+		<parameter name="cycleCompensationType" expression="'computer'"/>
+		<parameter name="cycleDirection" expression="'climb'"/>
+		<parameter name="cycleRepeatPass" expression="false"/>
+		<parameter name="cycleStepover" expression="Math.max((tool_diameter - 2 * tool_cornerRadius) * 0.95; tool_diameter * 0.05)"/>
+		<parameter name="cycleType" expression="tool_isMill ? ('drilling') : ((tool_type == 'tap right hand' || tool_type == 'tap left hand') ? 'tapping' : ((tool_type == 'reamer')?('reaming'):'drilling'))"/>
+		<parameter name="diameter" expression="2 * tool_diameter"/>
+		<parameter name="doLimitAngle" expression="false"/>
+		<parameter name="drillTipThroughBottom" expression="false"/>
+		<parameter name="dwellBeforeRetract" expression="false"/>
+		<parameter name="dwellDepth" expression="0"/>
+		<parameter name="dwellingPeriod" expression="0s"/>
+		<parameter name="feedHeight" expression="top + feedHeightOffset"/>
+		<parameter name="feedHeightMode" expression="'from top'"/>
+		<parameter name="feedHeightOffset" expression="5mm"/>
+		<parameter name="feedHeightRef" expression="undefined"/>
+		<parameter name="highFeedrate" expression="Math.max(tool_feedCutting; tool_feedEntry; tool_feedExit)"/>
+		<parameter name="highFeedrateMode" expression="'disabled'"/>
+		<parameter name="holeDiameterMaximum" expression="holeDiameterMinimum*2"/>
+		<parameter name="holeDiameterMinimum" expression="5mm"/>
+		<parameter name="holeMode" expression="'selection-faces'"/>
+		<parameter name="incrementalDepth" expression="2.0mm"/>
+		<parameter name="limitAngleMaximum" expression="limitAngleMinimum+45deg"/>
+		<parameter name="limitAngleMinimum" expression="0deg"/>
+		<parameter name="mergeHoleSegments" expression="true"/>
+		<parameter name="minimumPeckingDepth" expression="peckingDepth"/>
+		<parameter name="numberOfSteps" expression="2"/>
+		<parameter name="optimizeOrder" expression="false"/>
+		<parameter name="orderByDepth" expression="false"/>
+		<parameter name="orderInsideOut" expression="false"/>
+		<parameter name="overrideToolView" expression="false"/>
+		<parameter name="peckingDepth" expression="tool_diameter * 0.25"/>
+		<parameter name="peckingDepthReduction" expression="0"/>
+		<parameter name="pitch" expression="1.0mm"/>
+		<parameter name="positioningFeedrate" expression="tool_feedRetract"/>
+		<parameter name="positioningSpindleSpeed" expression="tool_spindleSpeed"/>
+		<parameter name="retractHeight" expression="stockZHigh + retractHeightOffset"/>
+		<parameter name="retractHeightMode" expression="'from stock top'"/>
+		<parameter name="retractHeightOffset" expression="5mm"/>
+		<parameter name="retractHeightRef" expression="undefined"/>
+		<parameter name="shiftOrientation" expression="0.0deg"/>
+		<parameter name="startingDepth" expression="tool_diameter"/>
+		<parameter name="stopSpindle" expression="false"/>
+		<parameter name="surfaceTolerance" expression="tolerance * 0.5"/>
+		<parameter name="threading" expression="'right'"/>
+		<parameter name="toChamferDiameter" expression="tool_diameter"/>
+		<parameter name="toChamferWidth" expression="0.0mm"/>
+		<parameter name="tolerance" expression="Math.min(tool_diameter/100; 0.01mm)"/>
+		<parameter name="toolViewOriginSelectionMode" expression="'setupWCS'"/>
+		<parameter name="top" expression="topOffset"/>
+		<parameter name="topMode" expression="'from hole top'"/>
+		<parameter name="topOffset" expression="0mm"/>
+		<parameter name="topRef" expression="undefined"/>
+		<parameter name="useMultiAxis" expression="viewSelection == 'axis'"/>
+		<parameter name="useMultipleSteps" expression="false"/>
+		<parameter name="viewOrigin" expression=""/>
+		<parameter name="viewPlane" expression=""/>
+		<parameter name="viewReverseX" expression="false"/>
+		<parameter name="viewReverseY" expression="false"/>
+		<parameter name="viewReverseZ" expression="false"/>
+		<parameter name="viewSelection" expression="'originAndOrientation'"/>
+		<parameter name="wcsOriginSelection" expression="'top center'"/>
+	</template>
+</template-document>

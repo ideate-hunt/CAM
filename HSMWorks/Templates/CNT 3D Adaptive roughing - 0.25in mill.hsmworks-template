@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<template-document version="1.0" xmlns="http://www.hsmworks.com/namespace/hsmworks/document/template">
+	<template strategy="adaptive" unit="millimeters" description="3D Adaptive roughing">
+		<tool version="1.1" type="flat end mill" unit="inches" guid="{5d24cea9-4448-4c00-8422-ae1ee8467565}">
+			<description>All Materials</description>
+			<manufacturer>Onsrud</manufacturer>
+			<nc number="3" diameter-offset="0" length-offset="0" break-control="0" manual-tool-change="0"/>
+			<coolant mode="disabled"/>
+			<material name="carbide"/>
+			<body diameter="0.25" flute-length="1.125" shoulder-length="1.125" shaft-diameter="0.25" body-length="2.375" overall-length="3" number-of-flutes="1" thread-pitch="0"/>
+			<holder description="IDeATe CNC Tool Holder" comment="ISO-30, ER032, Quick Change" vendor="CNT Motion Systems" guid="{07e277e5-26dd-4b06-ab21-df8ede8d31a9}" library-name="2015_IDeATe_HSM">
+				<section diameter="1.9685" length="0"/>
+				<section diameter="1.9685" length="1.34252"/>
+				<section diameter="1.9685" length="0.1771654"/>
+				<section diameter="1.74409" length="0.0590551"/>
+				<section diameter="1.74409" length="0.1535433"/>
+				<section diameter="1.9685" length="0.0590551"/>
+				<section diameter="1.9685" length="0.1771654"/>
+			</holder>
+			<motion spindle-rpm="16000" ramp-spindle-rpm="16000" clockwise="yes" feed-mode="per-minute" cutting-feedrate="300" entry-feedrate="150" exit-feedrate="150" plunge-feedrate="80" ramp-feedrate="100" retract-feedrate="80"/>
+		</tool>
+		<parameter name="tool_coolant" expression="'disabled'"/>
+		<parameter name="tool_feedCutting" expression="300.in/min"/>
+		<parameter name="tool_feedEntry" expression="150.in/min"/>
+		<parameter name="tool_feedExit" expression="150.in/min"/>
+		<parameter name="tool_feedPerRevolution" expression="tool_feedPlunge/tool_spindleSpeed"/>
+		<parameter name="tool_feedPerTooth" expression="tool_feedCutting/(tool_spindleSpeed * tool_numberOfFlutes)"/>
+		<parameter name="tool_feedPlunge" expression="80.in/min"/>
+		<parameter name="tool_feedRamp" expression="100.in/min"/>
+		<parameter name="tool_feedRetract" expression="80.in/min"/>
+		<parameter name="tool_rampFeedPerTooth" expression="tool_feedRamp/(tool_rampSpindleSpeed * tool_numberOfFlutes)"/>
+		<parameter name="tool_rampSpindleSpeed" expression="tool_spindleSpeed"/>
+		<parameter name="tool_rampSurfaceSpeed" expression="tool_isTurning ? (200m/min) : (tool_stockDiameter * Math.PI * tool_rampSpindleSpeed)"/>
+		<parameter name="tool_spindleSpeed" expression="16000."/>
+		<parameter name="tool_stockDiameter" expression="tool_isTurning ? (tool_unit == 'millimeters' ? 25 : 25.4) : tool_diameter"/>
+		<parameter name="tool_surfaceSpeed" expression="tool_isTurning ? (200m/min) : (tool_stockDiameter * Math.PI * tool_spindleSpeed)"/>
+		<parameter name="allowRapidRetract" expression="true"/>
+		<parameter name="allowRelinking" expression="true"/>
+		<parameter name="bottom" expression="surfaceZLow + bottomOffset"/>
+		<parameter name="bottomMode" expression="'from surface bottom'"/>
+		<parameter name="bottomOffset" expression="0mm"/>
+		<parameter name="bottomRef" expression="undefined"/>
+		<parameter name="boundaryContainment" expression="'outside'"/>
+		<parameter name="boundaryMode" expression="'selection'"/>
+		<parameter name="boundaryOffset" expression="0mm"/>
+		<parameter name="chainingTolerance" expression="0.01mm"/>
+		<parameter name="clearanceHeight" expression="retractHeight + clearanceHeightOffset"/>
+		<parameter name="clearanceHeightMode" expression="'from retract height'"/>
+		<parameter name="clearanceHeightOffset" expression="120mm"/>
+		<parameter name="clearanceHeightRef" expression="undefined"/>
+		<parameter name="contourTolerance" expression="tolerance * 0.5"/>
+		<parameter name="direction" expression="'conventional'"/>
+		<parameter name="doDepthLimit" expression="true"/>
+		<parameter name="explicitRampDiameter" expression="false"/>
+		<parameter name="filletsCornerRadius" expression="tool_cornerRadius + 2.0"/>
+		<parameter name="filletsEnabled" expression="false"/>
+		<parameter name="fineStepdown" expression="Math.min(tool_diameter * 0.5; maximumStepdown * 0.1)"/>
+		<parameter name="flatAreaMachining" expression="false"/>
+		<parameter name="forwardTilt" expression="0deg"/>
+		<parameter name="helicalRampDiameter" expression="Math.max((tool_diameter - 2 * tool_cornerRadius) * 0.95; tool_diameter * 0.25)"/>
+		<parameter name="highFeedrate" expression="Math.max(tool_feedCutting; tool_feedEntry; tool_feedExit)"/>
+		<parameter name="highFeedrateMode" expression="'disabled'"/>
+		<parameter name="holderClearance" expression="5.0mm"/>
+		<parameter name="leadRadius" expression="tool_diameter * 0.1"/>
+		<parameter name="liftHeight" expression="0.0mm"/>
+		<parameter name="loadDeviation" expression="(optimalLoad&lt;(tool_diameter-optimalLoad*0.20))?(optimalLoad*0.10):(tool_diameter-optimalLoad)/2"/>
+		<parameter name="machineCavities" expression="true"/>
+		<parameter name="machineShallowAreas" expression="false"/>
+		<parameter name="maximumSegmentLength" expression="5"/>
+		<parameter name="maximumStepdown" expression="7mm"/>
+		<parameter name="maximumTilt" expression="90deg"/>
+		<parameter name="maximumToolAxisSweep" expression="5.0deg"/>
+		<parameter name="minimumAxialEngagement" expression="0"/>
+		<parameter name="minimumRadius" expression="tool_diameter * 0.1"/>
+		<parameter name="minimumRampDiameter" expression="helicalRampDiameter"/>
+		<parameter name="minimumSilhouetteArea" expression="(Math.PI/4 * tool_diameter * tool_diameter) * 0.05"/>
+		<parameter name="minimumStayDownClearance" expression="Math.max(Math.min(tool_diameter * 0.1; 15.0); 2.0)"/>
+		<parameter name="minimumStepdown" expression="Math.min(maximumStepdown * 0.01; fineStepdown * 0.1)"/>
+		<parameter name="minimumTilt" expression="0deg"/>
+		<parameter name="noEngagementFeedrate" expression="Math.max(tool_feedCutting; tool_feedEntry; tool_feedExit)"/>
+		<parameter name="normalization" expression="surfaceZLow + normalizationOffset"/>
+		<parameter name="normalizationMode" expression="'from surface bottom'"/>
+		<parameter name="normalizationOffset" expression="0mm"/>
+		<parameter name="normalizationRef" expression="undefined"/>
+		<parameter name="optimalLoad" expression="tool_diameter * 0.4"/>
+		<parameter name="orderByArea" expression="false"/>
+		<parameter name="orderByDepth" expression="false"/>
+		<parameter name="overrideToolView" expression="false"/>
+		<parameter name="rampAngle" expression="15deg"/>
+		<parameter name="rampClearanceHeight" expression="2.5mm"/>
+		<parameter name="rampDiameter" expression="(tool_diameter - 2 * tool_cornerRadius) * 0.95"/>
+		<parameter name="rampTaperAngle" expression="0.0deg"/>
+		<parameter name="rampType" expression="'helix'"/>
+		<parameter name="reduceOnlyInnerCorners" expression="true"/>
+		<parameter name="reducedFeedChange" expression="25deg"/>
+		<parameter name="reducedFeedDistance" expression="tool_diameter * 0.2"/>
+		<parameter name="reducedFeedRadius" expression="tool_diameter * 0.05"/>
+		<parameter name="reducedFeedrate" expression="tool_feedCutting * 0.25"/>
+		<parameter name="restMaterialAdjustment" expression="'ignore cusps'"/>
+		<parameter name="restMaterialAdjustmentOffset" expression="0.5mm"/>
+		<parameter name="restMaterialCornerRadius" expression="restMaterialCutterDiameter * 0.5"/>
+		<parameter name="restMaterialCutterDiameter" expression="tool_diameter * 2"/>
+		<parameter name="restMaterialFile" expression="''"/>
+		<parameter name="restMaterialFromJob" expression="false"/>
+		<parameter name="restMaterialModel" expression="''"/>
+		<parameter name="restMaterialOperation" expression="37"/>
+		<parameter name="restMaterialOverlap" expression="tool_diameter * 0.1"/>
+		<parameter name="restMaterialPrevious" expression="true"/>
+		<parameter name="restMaterialResolution" expression="1mm"/>
+		<parameter name="restMaterialShoulderLength" expression="restMaterialCutterDiameter"/>
+		<parameter name="restMaterialSource" expression="'job'"/>
+		<parameter name="restMaterialStockToLeave" expression="0.0mm"/>
+		<parameter name="restMaterialTaperAngle" expression="0.0deg"/>
+		<parameter name="restMaterialUnion" expression="true"/>
+		<parameter name="retractHeight" expression="stockZHigh + retractHeightOffset"/>
+		<parameter name="retractHeightMode" expression="'from stock top'"/>
+		<parameter name="retractHeightOffset" expression="5mm"/>
+		<parameter name="retractHeightRef" expression="undefined"/>
+		<parameter name="retractionPolicy" expression="'full'"/>
+		<parameter name="shaftAndHolderMode" expression="'detect tool length'"/>
+		<parameter name="shaftClearance" expression="1.0mm"/>
+		<parameter name="shallowMinimumStepdown" expression="fineStepdown * 0.1"/>
+		<parameter name="shallowStepover" expression="fineStepdown"/>
+		<parameter name="sidewaysTilt" expression="0deg"/>
+		<parameter name="silhouetteAperture" expression="Math.max(tool_diameter * 0.05; 2.5)"/>
+		<parameter name="simpleStockToLeave" expression="false"/>
+		<parameter name="slotClearingWidth" expression="1.25 * tool_diameter"/>
+		<parameter name="smoothingFilter" expression="false"/>
+		<parameter name="smoothingFilterTolerance" expression="tolerance * 0.1"/>
+		<parameter name="stayDownDistance" expression="5 * tool_diameter"/>
+		<parameter name="stayDownLevel" expression="'level0'"/>
+		<parameter name="stockBoundaryMode" expression="'bounding-box'"/>
+		<parameter name="stockToLeave" expression="0.5mm"/>
+		<parameter name="surfaceTolerance" expression="tolerance * 0.5"/>
+		<parameter name="tiltMode" expression="'holder'"/>
+		<parameter name="tiltTool" expression="false"/>
+		<parameter name="tolerance" expression="0.1mm"/>
+		<parameter name="toolViewOriginSelectionMode" expression="'setupWCS'"/>
+		<parameter name="top" expression="stockZHigh + topOffset"/>
+		<parameter name="topMode" expression="'from stock top'"/>
+		<parameter name="topOffset" expression="0mm"/>
+		<parameter name="topRef" expression="undefined"/>
+		<parameter name="useEvenStepdowns" expression="true"/>
+		<parameter name="useFeedOptimization" expression="false"/>
+		<parameter name="useHolder" expression="true"/>
+		<parameter name="useRestMachining" expression="true"/>
+		<parameter name="useShaft" expression="true"/>
+		<parameter name="useShaftAndHolder" expression="tiltTool"/>
+		<parameter name="useSlotClearing" expression="false"/>
+		<parameter name="useStockToLeave" expression="true"/>
+		<parameter name="verticalLeadRadius" expression="leadRadius"/>
+		<parameter name="verticalStockToLeave" expression="stockToLeave"/>
+		<parameter name="viewOrigin" expression=""/>
+		<parameter name="viewPlane" expression=""/>
+		<parameter name="viewReverseX" expression="false"/>
+		<parameter name="viewReverseY" expression="false"/>
+		<parameter name="viewReverseZ" expression="false"/>
+		<parameter name="viewSelection" expression="'useWCS'"/>
+		<parameter name="wcsOriginSelection" expression="'top center'"/>
+	</template>
+</template-document>

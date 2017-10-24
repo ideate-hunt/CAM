@@ -29,6 +29,9 @@ millimeters or inches.
 **.hsmlib** files contain HSMWorks tool tables.  The same tables work with either
 millimeters or inches.
 
+**.hsmworks-template** files contain HSMWorks operation templates.  Each
+specifies all parameters (including tool) for a given operation type.  The same
+templates work with either millimeters or inches.
 
 CNT Router Tooling
 ------------------
